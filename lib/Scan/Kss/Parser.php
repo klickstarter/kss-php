@@ -22,6 +22,13 @@ class Parser
     protected $sections = array();
 
     /**
+     * An array of the different KSS sections which have a name comment
+     *
+     * @var array
+     */
+    protected $namedSections = array();
+
+    /**
      * A flag on whether sections have been sorted
      *
      * @var boolean
@@ -62,6 +69,8 @@ class Parser
     {
         $section = new Section($comment, $file);
         $this->sections[$section->getReference(true)] = $section;
+        $sectionName = $section->getNamedReference();
+        if( $sectionName!=null) $this->namedSections[$sectionName] = $section;
         $this->sectionsSortedByReference = false;
     }
 
@@ -71,9 +80,9 @@ class Parser
      *
      * @param string $reference
      *
+     * @throws Exception\UnexpectedValueException
      * @return Section
      *
-     * @throws UnexepectedValueException if reference does not exist
      */
     public function getSection($reference)
     {
@@ -82,6 +91,24 @@ class Parser
             throw new UnexpectedValueException('Section with a reference of ' . $reference . ' cannot be found!');
         }
         return $this->sections[$reference];
+    }
+
+    /**
+     * Returns a Section object matching the requested reference. If reference
+     * is not found, an empty Section object is returned instead
+     *
+     * @param $namedReference
+     * @throws Exception\UnexpectedValueException
+     *
+     * @return Section
+     */
+    public function getSectionByName($namedReference)
+    {
+        // $reference = Section::trimReference($reference);
+        if (!array_key_exists($namedReference, $this->namedSections)) {
+            throw new UnexpectedValueException('Section with a reference of ' . $namedReference . ' cannot be found!');
+        }
+        return $this->namedSections[$namedReference];
     }
 
     /**

@@ -47,6 +47,13 @@ class Section
     protected $reference = null;
 
     /**
+     * The optional section reference identifier string
+     *
+     * @var string
+     */
+    protected $namedReference = null;
+
+    /**
      * Creates a section with the KSS Comment Block and source file
      *
      * @param string $comment
@@ -87,6 +94,30 @@ class Section
         }
 
         return $title;
+    }
+
+    /**
+     * Returns the reference number for the section
+     *
+     * @return string
+     */
+    public function getNamedReference()
+    {
+        $test= 'TEST';
+        if ($this->namedReference === null) {
+            $referenceComment = $this->getReferenceComment();
+            //$referenceComment = preg_replace('/\.$/', '', $referenceComment);
+
+            if (preg_match('/^\s*Name:\s*(.+)/', $referenceComment, $matches)) {
+                $this->namedReference = $matches[1];
+            }
+        }
+        /*
+        return ($trimmed && $this->reference !== null)
+            ? self::trimReference($this->reference)
+            : $this->reference;
+        */
+        return $this->namedReference;
     }
 
     /**
@@ -133,7 +164,7 @@ class Section
      * Returns the markup for the normal element (without modifierclass)
      *
      * @param string $replacement Replacement for $modifierClass variable
-     * @return void
+     * @return string
      */
     public function getMarkupNormal($replacement = '')
     {
@@ -162,7 +193,7 @@ class Section
 
                 if ($lastIndent && $indent > $lastIndent) {
                     $modifier = end($modifiers);
-                    $modifier->setDescription($modifier->getDescription() + trim($line));
+                    $modifier->setDescription($modifier->getDescription() . trim($line));
                 } else {
                     $lineParts = explode(' - ', $line);
 
@@ -284,10 +315,12 @@ class Section
     {
         return self::calcDepthScore($this->getReference());
     }
+
     /**
      * Calculates and returns the depth score for the section. Useful for sorting
      * sections correctly by their section reference numbers
      *
+     * @param string $reference
      * @return int
      */
     public static function calcDepthScore($reference)
@@ -363,6 +396,26 @@ class Section
         }
 
         return $titleComment;
+    }
+
+    /**
+     * Gets the NamedReference (Name:) part of the KSS Comment Block
+     *
+     * @return string
+     */
+    protected function getNamedReferenceComment()
+    {
+        $namedReferenceComment = null;
+
+        foreach ($this->getCommentSections() as $commentSection) {
+            // Identify the title by the # markdown header syntax
+            if (preg_match('/^\s*Name:/i', $commentSection)) {
+                $namedReferenceComment = $commentSection;
+                break;
+            }
+        }
+
+        return $namedReferenceComment;
     }
 
     /**

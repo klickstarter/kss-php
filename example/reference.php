@@ -31,6 +31,12 @@
     the pain from creating a styleguide — document your CSS, have example
     HTML in your templates and automate as much as possible.
 </p>
+<p>
+Versuch die den Button 1.1 über dei namedReference zu bekommen:
+</p>
+<?php
+    echo $kss->getSectionByName('button')->getMarkup();
+?>
 
 <?php
     require_once('includes/footer.inc.php');
